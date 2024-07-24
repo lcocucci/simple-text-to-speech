@@ -6,8 +6,6 @@ router = APIRouter()
 
 @router.post("/")
 async def tts(request: SynthesisRequest):
-    # if request.method == "local":
-    #     audio = await synthesize_with_piper(request.text)
     if request.method == "api":
         audio = await synthesize_with_google_tts(request.text)
     else:
