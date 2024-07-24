@@ -3,9 +3,12 @@ FROM python:3.10
 
 WORKDIR /usr/src/app
 
+# Instalar dependencias del sistema, incluyendo eSpeak-ng
+RUN apt-get update && apt-get install -y espeak-ng espeak-ng-data
+
 COPY requirements.txt .
 
-# Instalar dependencias, incluyendo piper-tts
+# Instalar dependencias de Python, incluyendo piper-tts
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
