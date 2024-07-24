@@ -1,15 +1,23 @@
+from gtts import gTTS
 from google.cloud import texttospeech
-# import piper
 import base64
+import io
+import datetime
 
-# model_path = "path/to/piper/model"
-# voice = piper.Voice(model_path)
+# Google tts (basic synthesis)
 
-# async def synthesize_with_piper(text: str) -> str:
-#     audio = voice.synthesize(text)
-#     audio_base64 = base64.b64encode(audio).decode("utf-8")
-#     return audio_base64
+async def synthesize_with_gtts(text: str) -> str:
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    tts = gTTS(text, lang='es', tld='us')
+    tts.save(f'./samples/gtts-sample-{now}.mp3')
+    audio_buffer = io.BytesIO()
+    tts.write_to_fp(audio_buffer)
+    audio_buffer.seek(0)
+    audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
+    return audio_base64
 
+
+# Google Cloud tts (premium synthesis)
 
 async def synthesize_with_google_tts(text: str) -> str:
     client = texttospeech.TextToSpeechClient()
