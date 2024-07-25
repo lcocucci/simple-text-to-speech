@@ -9,17 +9,10 @@ import io
 
 app = FastAPI()
 
-@app.get('/')
-async def root():
-    return {'greetings': 'welcome to the FastAPI app'}
-
-
-@app.post("/tts")
-async def tts(request: SynthesisRequest):
-    if request.method == "api":
-        audio = await synthesize_with_google_tts(request.text)
-    elif request.method == "gtts":
-        audio = await synthesize_with_gtts(request.text)
+@app.post("/synthesize")
+async def synthesize(request: SynthesisRequest):
+    if request.method == "local":
+        audio = await synthesize_with_piper(request.text)
     else:
         raise HTTPException(status_code=400, detail="Invalid method")
     

@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  piper:
+    build:
+      context: .
+      dockerfile: Dockerfile.piper
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./piper-models:/usr/src/app/piper-models
