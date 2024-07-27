@@ -1,31 +1,50 @@
-from piper.voice import PiperVoice
+import datetime
+import base64
+import io
+import wave
 from gtts import gTTS
 from pathlib import Path
-import base64
-import wave
-import io
-import datetime
+from piper.voice import PiperVoice
+from fastapi.responses import StreamingResponse
+import os
 
-# Definimos el path en el que se encuentra el modelo de piper
+# Configurar la ruta al modelo de Piper
 model_path = Path("/usr/src/app/piper-models/es_MX-claude-high.onnx")
 voice = PiperVoice.load(str(model_path))
 
-# Sísntesis de voz en local con piper
-async def synthesize_with_piper(text: str) -> str:
-    output_buffer = io.BytesIO()
-    with wave.open(output_buffer, "w") as wav_file:
+# Asegurarse de que el directorio samples existe
+os.makedirs("./samples", exist_ok=True)
+
+# Síntesis de voz en local con Piper
+async def synthesize_with_piper(text: str):
+    now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    file_path = f'./samples/piper-sample-{now}.wav'
+    
+    with wave.open(file_path, "w") as wav_file:
         voice.synthesize(text, wav_file)
-    output_buffer.seek(0)
-    audio_base64 = base64.b64encode(output_buffer.read()).decode("utf-8")
-    return audio_base64
+    
+    with open(file_path, "rb") as f:
+        audio_bytes = f.read()
+    
+    # Convertir a base64
+    audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+    audio_buffer = io.BytesIO(base64.b64decode(audio_base64))
+    
+    return StreamingResponse(audio_buffer, media_type="audio/wav")
 
 # Síntesis de voz utilizando gTTS
-async def synthesize_with_gtts(text: str) -> str:
+async def synthesize_with_gtts(text: str):
     now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    file_path = f'./samples/gtts-sample-{now}.mp3'
+    
     tts = gTTS(text, lang='es', tld='us')
-    tts.save(f'./samples/gtts-sample-{now}.mp3')
-    audio_buffer = io.BytesIO()
-    tts.write_to_fp(audio_buffer)
-    audio_buffer.seek(0)
-    audio_base64 = base64.b64encode(audio_buffer.read()).decode("utf-8")
-    return audio_base64
+    tts.save(file_path)
+    
+    with open(file_path, "rb") as f:
+        audio_bytes = f.read()
+    
+    # Convertir a base64
+    audio_base64 = base64.b64encode(audio_bytes).decode("utf-8")
+    audio_buffer = io.BytesIO(base64.b64decode(audio_base64))
+    
+    return StreamingResponse(audio_buffer, media_type="audio/mpeg")

@@ -1,1 +1,4 @@
-samples
+samples/*
+
+# Comando necesario para trakcear 'samples' sin tracker los audios que este contiene
+!samples/.gitkeep

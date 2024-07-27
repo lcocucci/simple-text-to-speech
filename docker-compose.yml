@@ -9,3 +9,4 @@ services:
       - "8001:8001"
     volumes:
       - ./piper-models:/usr/src/app/piper-models
+      - ./samples:/usr/src/app/samples
